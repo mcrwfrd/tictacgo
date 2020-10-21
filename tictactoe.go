@@ -4,72 +4,85 @@ import (
 	"fmt"
 )
 
+type player struct {
+	name   string
+	marker int
+}
+
+type board struct {
+	dimension int
+}
+
 func main() {
 	fmt.Println("The game is Tic Tac Toe. Here is the game board:")
 	printMockBoard()
 	fmt.Println("Standard rules apply.")
 	fmt.Println("In order to select a space, type the number corresponding to the space you to select according to the mock board above and press enter.")
 
-	var moves [9]int
-	var rows [3]int
-	var columns [3]int
+	const dim = 3
+	const numMoves = dim * dim
+	board := board{dimension: dim}
+
+	fmt.Println(board.dimension)
+	fmt.Println(numMoves)
+	var moves [numMoves]int
+	var rows [dim]int
+	var columns [dim]int
 	var choice int
-	currPlayer := 1
-	winner := 0
+
+	player1 := player{name: "Player 1", marker: 1}
+	player2 := player{name: "Player 2", marker: -1}
+
+	currPlayer := player1
+	var winner player
 	for i := 0; i < 9; i++ {
-		if currPlayer == 1 {
-			fmt.Print("Player 1 Move: ")
-		} else {
-			fmt.Print("Player 2 Move: ")
-		}
+		fmt.Print(currPlayer.name)
 		_, err := fmt.Scanf("%d", &choice)
 
 		if err != nil {
 			fmt.Println("Please enter an integer between 1 and 9.")
 		}
 
-		moves[choice] = currPlayer
+		moves[choice] = currPlayer.marker
 		printBoard(moves)
 
 		row := determineRow(choice)
-		rows[row] += currPlayer
+		rows[row] += currPlayer.marker
 
 		column := determineColumn(choice)
-		columns[column] += currPlayer
+		columns[column] += currPlayer.marker
 
 		if rows[row] == 3 {
-			winner = 1
+			winner = player1
 			break
 		}
 
 		if rows[row] == -3 {
-			winner = -1
+			winner = player2
 			break
 		}
 
 		if columns[column] == 3 {
-			winner = 1
+			winner = player1
 			break
 		}
 
 		if columns[column] == -3 {
-			winner = -1
+			winner = player2
 			break
 		}
 
-		if currPlayer == 1 {
-			currPlayer = -1
+		if currPlayer == player1 {
+			currPlayer = player2
 		} else {
-			currPlayer = 1
+			currPlayer = player1
 		}
 	}
 
-	if winner == 1 {
-		fmt.Println("Player 1 Wins!")
-	} else if winner == -1 {
-		fmt.Println("Player 2 Wins!")
+	if winner.name != "" {
+		fmt.Println(winner.name)
 	} else {
-		fmt.Println("Uh Oh, It's a Draw!")
+		fmt.Println("draw")
 	}
 }
 
