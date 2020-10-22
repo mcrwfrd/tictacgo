@@ -24,68 +24,87 @@ func (b board) printMap() {
 	}
 }
 
+type game struct {
+	player1 player
+	player2 player
+	board board
+	moves int
+	rowScore []int
+	columnScore []int
+	currPlayer player
+}
+
+func (g *game) toggleCurrPlayer() {
+	if (g.currPlayer == g.player1) {
+		fmt.Println("here")
+		g.currPlayer = g.player2
+	} else {
+		g.currPlayer = g.player1
+	}
+}
+
 func main() {
 	const dim = 3
 	const numMoves = dim * dim
-	board := board{dimension: dim}
+
+	g := new(game)
+	g.player1 = player{name: "Player 1", marker: 1}
+	g.player2 = player{name: "Player 2", marker: -1}
+	g.board = board{dimension: 3}
+	g.moves = g.board.dimension * g.board.dimension
+	g.rowScore = []int{0, 0, 0}
+	g.columnScore = []int{0, 0, 0}
+	g.currPlayer = g.player1
 
 	fmt.Println("The game is Tic Tac Toe. Here is the game board:")
-	board.printMap()
+	g.board.printMap()
 	fmt.Println("Standard rules apply.")
 	fmt.Println("In order to select a space, type the number corresponding to the space you to select according to the mock board above and press enter.")
 
-	var moves [numMoves]int
-	var rows [dim]int
-	var columns [dim]int
+	var moves [9]int
+	var rows [3]int
+	var columns [3]int
 	var choice int
 
-	player1 := player{name: "Player 1", marker: 1}
-	player2 := player{name: "Player 2", marker: -1}
-
-	currPlayer := player1
 	var winner player
-	for i := 0; i < 9; i++ {
-		fmt.Print(currPlayer.name)
+	for i := 0; i < g.moves; i++ {
+		fmt.Print(g.currPlayer.name)
 		_, err := fmt.Scanf("%d", &choice)
 
 		if err != nil {
 			fmt.Println("Please enter an integer between 1 and 9.")
 		}
 
-		moves[choice] = currPlayer.marker
+		moves[choice] = g.currPlayer.marker
 		printBoard(moves)
 
 		row := determineRow(choice)
-		rows[row] += currPlayer.marker
+		rows[row] += g.currPlayer.marker
 
 		column := determineColumn(choice)
-		columns[column] += currPlayer.marker
+		columns[column] += g.currPlayer.marker
 
 		if rows[row] == 3 {
-			winner = player1
+			winner = g.player1
 			break
 		}
 
 		if rows[row] == -3 {
-			winner = player2
+			winner = g.player2
 			break
 		}
 
 		if columns[column] == 3 {
-			winner = player1
+			winner = g.player1
 			break
 		}
 
 		if columns[column] == -3 {
-			winner = player2
+			winner = g.player2
 			break
 		}
 
-		if currPlayer == player1 {
-			currPlayer = player2
-		} else {
-			currPlayer = player1
-		}
+		g.toggleCurrPlayer()
 	}
 
 	if winner.name != "" {
