@@ -13,18 +13,27 @@ type board struct {
 	dimension int
 }
 
-func main() {
-	fmt.Println("The game is Tic Tac Toe. Here is the game board:")
-	printMockBoard()
-	fmt.Println("Standard rules apply.")
-	fmt.Println("In order to select a space, type the number corresponding to the space you to select according to the mock board above and press enter.")
+func (b board) printMap() {
+	var spaces = b.dimension * b.dimension
+	for i := 0; i < spaces; i++ {
+		if ((i+1)%b.dimension == 0) {
+			fmt.Printf(" %d \n", i)
+		} else {
+			fmt.Printf(" %d |", i)
+		}
+	}
+}
 
+func main() {
 	const dim = 3
 	const numMoves = dim * dim
 	board := board{dimension: dim}
 
-	fmt.Println(board.dimension)
-	fmt.Println(numMoves)
+	fmt.Println("The game is Tic Tac Toe. Here is the game board:")
+	board.printMap()
+	fmt.Println("Standard rules apply.")
+	fmt.Println("In order to select a space, type the number corresponding to the space you to select according to the mock board above and press enter.")
+
 	var moves [numMoves]int
 	var rows [dim]int
 	var columns [dim]int
@@ -112,8 +121,3 @@ func printBoard(m [9]int) {
 	fmt.Printf(" %d | %d | %d \n", m[6], m[7], m[8])
 }
 
-func printMockBoard() {
-	fmt.Println(" 0 | 1 | 2 ")
-	fmt.Println(" 3 | 4 | 5 ")
-	fmt.Println(" 6 | 7 | 8 ")
-}
