@@ -16,11 +16,49 @@ type board struct {
 func (b board) printMap() {
 	var spaces = b.dimension * b.dimension
 	for i := 0; i < spaces; i++ {
-		if ((i+1)%b.dimension == 0) {
+		if (i+1)%b.dimension == 0 {
 			fmt.Printf(" %d \n", i)
 		} else {
 			fmt.Printf(" %d |", i)
 		}
+	}
+}
+
+func (b board) printBoard(m [9]int) {
+	fmt.Printf(" %s | %s | %s \n", b.getSymbol(m[0]), b.getSymbol(m[1]), b.getSymbol(m[2]))
+	fmt.Printf(" %s | %s | %s \n", b.getSymbol(m[3]), b.getSymbol(m[4]), b.getSymbol(m[5]))
+	fmt.Printf(" %s | %s | %s \n", b.getSymbol(m[6]), b.getSymbol(m[7]), b.getSymbol(m[8]))
+}
+
+func (b board) getSymbol(i int) string {
+	if i == 1 {
+		return "X"
+	}
+
+	if i == -1 {
+		return "O"
+	}
+
+	return "-"
+}
+
+func (b board) determineRow(i int) int {
+	if i <= 2 {
+		return 0
+	} else if i <= 5 {
+		return 1
+	} else {
+		return 2
+	}
+}
+
+func (b board) determineColumn(i int) int {
+	if i%3 == 0 {
+		return 0
+	} else if (i+1)%3 == 0 {
+		return 2
+	} else {
+		return 1
 	}
 }
 
@@ -32,11 +70,37 @@ type game struct {
 	rowScore []int
 	columnScore []int
 	currPlayer player
+	winner player
+}
+
+func (g *game) getWinner(squareChoice int) (player, bool){
+	row := g.board.determineRow(squareChoice)
+	g.rowScore[row] += g.currPlayer.marker
+
+	column := g.board.determineColumn(squareChoice)
+	g.columnScore[column] += g.currPlayer.marker
+
+	if g.rowScore[row] == 3 {
+		g.winner = g.player1
+	}
+
+	if g.rowScore[row] == -3 {
+		g.winner = g.player2
+	}
+
+	if g.columnScore[column] == 3 {
+		g.winner = g.player1
+	}
+
+	if g.columnScore[column] == -3 {
+		g.winner = g.player2
+	}
+
+	return player{}, false
 }
 
 func (g *game) toggleCurrPlayer() {
-	if (g.currPlayer == g.player1) {
-		fmt.Println("here")
+	if g.currPlayer == g.player1 {
 		g.currPlayer = g.player2
 	} else {
 		g.currPlayer = g.player1
@@ -44,9 +108,6 @@ func (g *game) toggleCurrPlayer() {
 }
 
 func main() {
-	const dim = 3
-	const numMoves = dim * dim
-
 	g := new(game)
 	g.player1 = player{name: "Player 1", marker: 1}
 	g.player2 = player{name: "Player 2", marker: -1}
@@ -59,84 +120,33 @@ func main() {
 	fmt.Println("The game is Tic Tac Toe. Here is the game board:")
 	g.board.printMap()
 	fmt.Println("Standard rules apply.")
-	fmt.Println("In order to select a space, type the number corresponding to the space you to select according to the mock board above and press enter.")
+	fmt.Println("To play, just type the number in the square you want to choose.")
 
 	var moves [9]int
-	var rows [3]int
-	var columns [3]int
 	var choice int
 
-	var winner player
-	for i := 0; i < g.moves; i++ {
-		fmt.Print(g.currPlayer.name)
+	for (player{}) == g.winner {
+		fmt.Printf("%s's turn: ", g.currPlayer.name)
 		_, err := fmt.Scanf("%d", &choice)
-
 		if err != nil {
 			fmt.Println("Please enter an integer between 1 and 9.")
+			break
+		}
+
+		if moves[choice] != 0 {
+			fmt.Println("That square is already taken.")
+			break
 		}
 
 		moves[choice] = g.currPlayer.marker
-		printBoard(moves)
-
-		row := determineRow(choice)
-		rows[row] += g.currPlayer.marker
-
-		column := determineColumn(choice)
-		columns[column] += g.currPlayer.marker
-
-		if rows[row] == 3 {
-			winner = g.player1
-			break
-		}
-
-		if rows[row] == -3 {
-			winner = g.player2
-			break
-		}
-
-		if columns[column] == 3 {
-			winner = g.player1
-			break
-		}
-
-		if columns[column] == -3 {
-			winner = g.player2
-			break
-		}
-
+		g.board.printBoard(moves)
+		g.getWinner(choice)
 		g.toggleCurrPlayer()
 	}
 
-	if winner.name != "" {
-		fmt.Println(winner.name)
+	if g.winner != (player{}) {
+		fmt.Printf("%s is the winner!", g.winner.name)
 	} else {
-		fmt.Println("draw")
+		fmt.Print("Doh! The game was a draw.")
 	}
 }
-
-func determineRow(i int) int {
-	if i <= 2 {
-		return 0
-	} else if i <= 5 {
-		return 1
-	} else {
-		return 2
-	}
-}
-
-func determineColumn(i int) int {
-	if i%3 == 0 {
-		return 0
-	} else if (i+1)%3 == 0 {
-		return 2
-	} else {
-		return 1
-	}
-}
-
-func printBoard(m [9]int) {
-	fmt.Printf(" %d | %d | %d \n", m[0], m[1], m[2])
-	fmt.Printf(" %d | %d | %d \n", m[3], m[4], m[5])
-	fmt.Printf(" %d | %d | %d \n", m[6], m[7], m[8])
-}
-
